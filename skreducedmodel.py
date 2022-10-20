@@ -2,6 +2,7 @@ import numpy as np
 import attr
 import integrals
 import logging
+import validators
 
 logger = logging.getLogger("arby.basis")
 
@@ -190,6 +191,12 @@ class ReducedModel:
         # elif complex training set:
         #     decompose complex data in phase and amplitude
         #     fit two regressions for each T_i (maps f:R^d->R)
+
+        # Call validators
+        validators.validate_parameters(parameters)
+        validators.validate_physical_points(physical_points)
+        validators.validate_training_set(training_set)
+
 
         rb = self.reduced_basis(
                            #  self,  # [fc] por que funciona comentando el self?
