@@ -1,5 +1,13 @@
 import integrals
 import numpy as np
+import pytest
+
+@pytest.mark.parametrize("rule", ["fake_rule", 1 / 137.0])
+def test_bad_integration_inputs(rule):
+    """Test rule input."""
+    interval = np.linspace(0, 1, 101)
+    with pytest.raises(ValueError):
+        integrals.Integration(interval=interval, rule=rule)
 
 def test_trapezoidal():
     """Test integration rule."""
