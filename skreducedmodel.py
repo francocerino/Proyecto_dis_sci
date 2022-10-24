@@ -153,33 +153,34 @@ class Basis:
 
 class ReducedModel:
     # required performance metrics: prediction time and accuracy of the model.
-    def __init__(self,
-                regression_method = None,
-                seed_global_rb = 0,
-                greedy_tol = 1e-12,
-                lmax = 0,
-                nmax = np.inf,
-                normalize = False,
-                all_training_set_for_reg = False,
-                integration_rule = "riemann"
-                ):
+    def __init__(
+            self,
+            regression_method=None,
+            seed_global_rb=0,
+            greedy_tol=1e-12,
+            lmax=0,
+            nmax=np.inf,
+            normalize=False,
+            all_training_set_for_reg=False,
+            integration_rule="riemann"):
 
         # the default one can be Least Squares or Splines (like arby)
         self.regression_method = regression_method
-        self.seed_global_rb = seed_global_rb  # the default seed is the first of the array "parameters"
+        # the default seed is the first of the array "parameters"
+        self.seed_global_rb = seed_global_rb
         self.greedy_tol = greedy_tol
         self.lmax = lmax
         self.nmax = nmax
         self.normalize = normalize
         self.all_training_set_for_reg = all_training_set_for_reg
         self.integration_rule = integration_rule
-        
+
     # fit stage is offline.
     def fit(
             self,
             parameters,  # array N x d. N parameters. Each parameter is d dim.
             # array N x t. N train functions w/ values at t phys_points.
-            training_set,  
+            training_set,
             physical_points,  # array 1 x t. physical_points
             ):
         # do parameter compression (find reduced basis RB).
@@ -197,19 +198,18 @@ class ReducedModel:
         validators.validate_physical_points(physical_points)
         validators.validate_training_set(training_set)
 
-
         rb = self.reduced_basis(
-                           #  self,  # [fc] por que funciona comentando el self?
-                           training_set,
-                           parameters,
-                           physical_points,
-                           greedy_tol = self.greedy_tol,
-                           lmax = self.lmax,
-                           nmax = self.nmax,
-                           seed_global_rb = self.seed_global_rb,
-                           integration_rule = self.integration_rule,
-                           normalize = self.normalize
-                           )
+                #  self,  # [fc] por que funciona comentando el self?
+                training_set,
+                parameters,
+                physical_points,
+                greedy_tol=self.greedy_tol,
+                lmax=self.lmax,
+                nmax=self.nmax,
+                seed_global_rb=self.seed_global_rb,
+                integration_rule=self.integration_rule,
+                normalize=self.normalize
+                )
 
         return rb  # [fc] ver la salida que corresponde
 
@@ -230,7 +230,7 @@ class ReducedModel:
                ):
 
         pass
-        
+
     # comenzamos la implementacion de reduced_basis
     # la idea es acoplar esto al método fit.
     def reduced_basis(
