@@ -3,7 +3,7 @@ import validators
 
 
 def test_validators():
-    # assert validate_parameters(np.array([1,2,3]))
+    # assert validate_parameters(np.array([1, 2, 3]))
     with pytest.raises(TypeError):
         validators.validate_parameters([1, 2, 3])
     with pytest.raises(TypeError):
