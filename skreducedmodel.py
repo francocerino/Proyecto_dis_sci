@@ -316,6 +316,7 @@ class ReducedModel:
         (2021)
 
         """
+        assert nmax > 0
 
         integration = integrals.Integration(
                                             physical_points,

@@ -4,6 +4,35 @@ from skreducedmodel import ReducedModel
 # from scipy.special import jv as BesselJ
 
 
+
+
+def test_dim_rb_with_nmax():
+    
+    # import data of 1d gravitational waves
+    q_train = np.load("q_train_1d_seed=1.npy")
+    ts_train = np.load("ts_train_1d_seed=1.npy")
+    # q_test = np.load("q_test_1d_seed=1.npy")
+    # ts_test = np.load("ts_test_1d_seed=1.npy")
+    times = np.load("times_1d_seed=1.npy")
+    
+    # para nmax == 0 tiene que saltar el assert
+    for nmax in range(1,3):
+        model = ReducedModel(
+                    seed_global_rb=0,
+                    greedy_tol=1e-16,
+                    lmax=0,
+                    nmax=nmax,
+                    normalize=True
+                    )
+
+        rb = model.fit(
+                training_set=ts_train,
+                parameters=q_train,
+                physical_points=times
+                )
+
+        assert len(rb.indices) == nmax
+
 def pend(y, t, b, λ):
     θ, ω = y
     dydt = [ω, -b*ω - λ*np.sin(θ)]
