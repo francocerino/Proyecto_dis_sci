@@ -1,6 +1,8 @@
 from scipy.integrate import odeint
 import numpy as np
 from skreducedmodel import ReducedModel
+from scipy.special import jv as BesselJ
+
 
 def pend(y, t, b, λ):
     θ, ω = y
@@ -92,5 +94,32 @@ def test_rmfit_parameters():
         
         
         assert len(rb1.indices) < len(rb2.indices)
-        #assert rb1.errors[5]  rb2.errors[5]
-        #assert rb1.indices[0] != rb2.indices[0]
+
+
+def test_rom_rb_interface(rom_parameters):
+    """Test API consistency."""
+    training_set = rom_parameters["training_set"]
+    physical_points = rom_parameters["physical_points"]
+    parameter_points = rom_parameters["parameter_points"]
+
+    model = ReducedModel(greedy_tol=1e-14)
+
+    bessel = model.fit(training_set = training_set,
+                       physical_points=physical_points,
+                       parameters=parameter_points
+                       )
+
+    #bessel = ReducedOrderModel(
+    #    training_set, physical_points, parameter_points, greedy_tol=1e-14
+    #)
+    basis = bessel.basis.data
+    errors = bessel.errors
+    projection_matrix = bessel.projection_matrix
+    greedy_indices = bessel.indices
+    #eim = bessel.eim_
+
+    assert len(basis) == 10
+    assert len(errors) == 10
+    assert len(projection_matrix) == 101
+    assert len(greedy_indices) == 10
+    #assert eim == bessel.basis_.eim_
