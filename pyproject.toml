@@ -3,8 +3,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scikitreducedmodels"
-version = "0.0.0"
+name = "scikitreducedmodel"
+version = "0.0.1"
 authors = [{name = "Franco Cerino", email = "--@gmail.com"}]
 license = {text = "The MIT License"}
 readme = "README.md"
@@ -25,5 +25,5 @@ urls = {Homepage = "https://github.com/francocerino/scikit-reducedmodel"}
 dependencies = ["numpy", "pandas", "scipy", "attrs", "matplotlib", "arby"]
 
 [tool.setuptools]
-packages = ["skreducedmodel", "skreducedmodel.*"]
+packages = ["skreducedmodel"]###, "skreducedmodel.*"]
 include-package-data = true
