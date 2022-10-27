@@ -1,19 +1,20 @@
-from asyncio.log import logger
 from skreducedmodel import integrals
 import numpy as np
 import logging
 
 logger = logging.getLogger("arby.basis")
 
+
 class ReducedBasis:
     def __init__(
-            self,
-            seed_global_rb=0,
-            lmax=0,
-            nmax=np.inf,
-            greedy_tol=1e-12,
-            normalize=False,
-            integration_rule="riemann") -> None:
+        self,
+        seed_global_rb=0,
+        lmax=0,
+        nmax=np.inf,
+        greedy_tol=1e-12,
+        normalize=False,
+        integration_rule="riemann",
+    ) -> None:
 
         # the default seed is the first of the array "parameters"
         self.seed_global_rb = seed_global_rb
@@ -23,15 +24,9 @@ class ReducedBasis:
         self.normalize = normalize
         self.integration_rule = integration_rule
 
-
     # comenzamos la implementacion de reduced_basis
     # la idea es acoplar esto al método fit de ReducedModel.
-    def fit(
-            self,
-            training_set,
-            parameters,
-            physical_points
-            ) -> None:
+    def fit(self, training_set, parameters, physical_points) -> None:
         """Build a reduced basis from training data.
 
         This function implements the Reduced Basis (RB) greedy algorithm for
@@ -106,10 +101,7 @@ class ReducedBasis:
 
         assert self.nmax > 0
 
-        integration = integrals.Integration(
-                                            physical_points,
-                                            rule=self.integration_rule
-                                            )
+        integration = integrals.Integration(physical_points, rule=self.integration_rule)
 
         # useful constants
         Ntrain = training_set.shape[0]
@@ -118,9 +110,7 @@ class ReducedBasis:
 
         # validate inputs
         if Nsamples != np.size(integration.weights_):
-            raise ValueError(
-                "Number of samples is inconsistent with quadrature rule."
-            )
+            raise ValueError("Number of samples is inconsistent with quadrature rule.")
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -177,25 +167,24 @@ class ReducedBasis:
         # ====== Start greedy loop ======
         logger.debug("\n Step", "\t", "Error")
         nn = 0
+        print(nn,sigma,next_index)
         while sigma > self.greedy_tol and self.nmax > nn + 1:
             nn += 1
 
             if next_index in greedy_indices:
                 # Prune excess allocated entries
-                greedy_errors, proj_matrix = _prune(
-                                                    greedy_errors,
-                                                    proj_matrix,
-                                                    nn
-                                                    )
+                greedy_errors, proj_matrix = _prune(greedy_errors, proj_matrix, nn)
                 if self.normalize:
                     # restore proj matrix
                     proj_matrix = norms * proj_matrix
-                
-                self.basis = basis_data[: nn]
+
+                self.basis = basis_data[:nn]
                 self.indices = greedy_indices
                 self.errors = greedy_errors
                 self.projection_matrix = proj_matrix.T
                 self.integration = integration
+                print(nn,sigma,next_index)
+                return
 
             greedy_indices.append(next_index)
             basis_data[nn], _ = _gs_one_element(
@@ -208,14 +197,13 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn], basis_data[nn],
-                    integration.dot, diff_training
+                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
                 )
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
 
             sigma = errs[next_index]
-
+            print(nn,sigma,next_index)
             logger.debug(nn, "\t", sigma)
 
         # Prune excess allocated entries
@@ -230,15 +218,38 @@ class ReducedBasis:
         self.projection_matrix = proj_matrix.T
         self.integration = integration
 
-
     def transform(
-               self,
-               parameters,
-               test_set,
-               ):
-         
-        #self.reduced_basis.Basis.project(h=test_set,s=(None,))
-        pass  
+        self,        
+        test_set,
+        parameters,
+        s=(None,)
+    ):
+    # def project(self, h, s=(None,)):
+        """Project a function h onto the basis.
+
+        This method represents the action of projecting the function h onto the
+        span of the basis.
+
+        Parameters
+        ----------
+        h : np.ndarray
+            Function or set of functions to be projected.
+        s : tuple, optional
+            Slice the basis. If the slice is not provided, the whole basis is
+            considered. Default = (None,)
+
+        Returns
+        -------
+        projected_function : np.ndarray
+            Projection of h onto the basis.
+        """
+        s = slice(*s)
+        projected_function = 0.0
+        for e in self.basis[s]:
+            projected_function += np.tensordot(
+                self.integration.dot(e, test_set), e, axes=0
+            )
+        return projected_function
 
 
 def _prune(greedy_errors, proj_matrix, num):
