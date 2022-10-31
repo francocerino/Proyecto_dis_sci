@@ -1,7 +1,7 @@
 from scipy.integrate import odeint
 import numpy as np
-from skreducedmodel import ReducedModel
-from reducedbasis import ReducedBasis
+from skreducedmodel.skreducedmodel import ReducedModel
+from skreducedmodel.reducedbasis import ReducedBasis
 # from scipy.special import jv as BesselJ
 #
 #

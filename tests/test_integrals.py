@@ -1,4 +1,4 @@
-import integrals
+from skreducedmodel import integrals
 import numpy as np
 import pytest
 

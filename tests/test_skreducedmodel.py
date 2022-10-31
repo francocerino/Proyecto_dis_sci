@@ -1,6 +1,6 @@
 from scipy.integrate import odeint
 import numpy as np
-from skreducedmodel import ReducedModel
+from skreducedmodel.skreducedmodel import ReducedModel
 # from scipy.special import jv as BesselJ
 #
 #
@@ -31,7 +31,7 @@ from skreducedmodel import ReducedModel
 #        assert len(rb.indices) == nmax
 #
 #
-def pend(y, t, b, λ):
+""" def pend(y, t, b, λ):
     θ, ω = y
     dydt = [ω, -b*ω - λ*np.sin(θ)]
 
@@ -121,7 +121,7 @@ def test_rmfit_parameters():
             physical_points=physical_points,
             )
 
-    assert len(rb1.indices) < len(rb2.indices)
+    assert len(rb1.indices) < len(rb2.indices) """
 #
 #
 #def test_rom_rb_interface(rom_parameters):

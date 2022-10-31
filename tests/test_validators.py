@@ -1,5 +1,5 @@
 import pytest
-import validators
+from skreducedmodel import validators
 
 
 def test_validators():

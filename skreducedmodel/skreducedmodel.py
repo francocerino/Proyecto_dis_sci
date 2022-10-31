@@ -1,8 +1,6 @@
 import numpy as np
-import attr
-import integrals
 import logging
-import validators
+from . import validators
 
 logger = logging.getLogger("arby.basis")
 
@@ -66,7 +64,6 @@ class ReducedModel:
                 integration_rule=self.integration_rule,
                 normalize=self.normalize
                 )
-
         # return   # [fc] ver la salida que corresponde
 
     # predict stage is online (must be as fast as possible).
