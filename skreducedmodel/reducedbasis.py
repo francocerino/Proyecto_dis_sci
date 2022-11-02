@@ -1,6 +1,8 @@
-from skreducedmodel import integrals
-import numpy as np
 import logging
+
+import numpy as np
+
+from skreducedmodel import integrals
 
 logger = logging.getLogger("arby.basis")
 
@@ -105,15 +107,15 @@ class ReducedBasis:
                                             rule=self.integration_rule)
 
         # useful constants
-        Ntrain = training_set.shape[0]
-        Nsamples = training_set.shape[1]
-        max_rank = min(Ntrain, Nsamples)
+        ntrain = training_set.shape[0]
+        nsamples = training_set.shape[1]
+        max_rank = min(ntrain, nsamples)
 
         # validate inputs
-        if Nsamples != np.size(integration.weights_):
+        if nsamples != np.size(integration.weights_):
             raise ValueError(
                 "Number of samples is inconsistent with quadrature rule."
-                )
+                            )
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -122,8 +124,8 @@ class ReducedBasis:
 
         # memory allocation
         greedy_errors = np.empty(max_rank, dtype=np.float64)
-        proj_matrix = np.empty((max_rank, Ntrain), dtype=training_set.dtype)
-        basis_data = np.empty((max_rank, Nsamples), dtype=training_set.dtype)
+        proj_matrix = np.empty((max_rank, ntrain), dtype=training_set.dtype)
+        basis_data = np.empty((max_rank, nsamples), dtype=training_set.dtype)
 
         norms = integration.norm(training_set)
 
@@ -140,7 +142,7 @@ class ReducedBasis:
             next_index = self.seed_global_rb
             seed = training_set[next_index]
 
-            while next_index < Ntrain - 1:
+            while next_index < ntrain - 1:
                 if np.allclose(np.abs(seed), 0):
                     next_index += 1
                     seed = training_set[next_index]
@@ -151,7 +153,7 @@ class ReducedBasis:
             basis_data[0] = training_set[next_index]
             proj_matrix[0] = integration.dot(basis_data[0], training_set)
             sq_errors = _sq_errs_rel
-            errs = sq_errors(np.ones(Ntrain), proj_matrix[0])
+            errs = sq_errors(np.ones(ntrain), proj_matrix[0])
 
         else:
             next_index = np.argmax(norms)
