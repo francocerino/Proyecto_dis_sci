@@ -4,13 +4,15 @@ import numpy as np
 
 from skreducedmodel import integrals
 
+from anytree import Node
+
 logger = logging.getLogger("arby.basis")
 
 
 class ReducedBasis:
     def __init__(
         self,
-        seed_global_rb=0,
+        index_seed_global_rb=0,
         lmax=0,
         nmax=np.inf,
         greedy_tol=1e-12,
@@ -19,16 +21,28 @@ class ReducedBasis:
     ) -> None:
 
         # the default seed is the first of the array "parameters"
-        self.seed_global_rb = seed_global_rb
+        self.index_seed_global_rb = index_seed_global_rb
         self.lmax = lmax
         self.nmax = nmax
         self.greedy_tol = greedy_tol
         self.normalize = normalize
         self.integration_rule = integration_rule
+        self.__first_iteration = True
 
     # comenzamos la implementacion de reduced_basis
     # la idea es acoplar esto al método fit de ReducedModel.
-    def fit(self, training_set, parameters, physical_points) -> None:
+    def fit(
+        self,
+        training_set,
+        parameters,
+        physical_points,
+        # estas quiero que no se puedan modificar por el usuario.
+        # son solo valores para la primera llamada de la funcion fit de la recursion
+        parent=None,
+        node_idx=0,
+        l=0,
+        index_seed=None,  # = self.index_seed_global_rb
+    ) -> None:
         """Build a reduced basis from training data.
 
         This function implements the Reduced Basis (RB) greedy algorithm for
@@ -101,7 +115,27 @@ class ReducedBasis:
 
         """
 
-        assert self.nmax > 0
+        assert self.nmax > 0 and self.lmax >= 0
+
+        if self.__first_iteration is True:
+            index_seed = self.index_seed_global_rb
+            assert (
+                parent is None
+                and node_idx == 0
+                and l == 0
+                # index_seed == self.index_seed_global_rb
+            )
+            self.__first_iteration = False
+
+        # create a node for the tree
+        # if the tree does not exists, create it
+        if parent is not None:
+            node = Node(
+                name=parent.name + (node_idx,), parent=parent, parameters_ts=parameters
+            )
+        else:
+            self.tree = Node(name=(node_idx,), parameters_ts=parameters)
+            node = self.tree
 
         integration = integrals.Integration(physical_points,
                                             rule=self.integration_rule)
@@ -138,14 +172,21 @@ class ReducedBasis:
                 ]
             )
 
-            # seed
-            next_index = self.seed_global_rb
+            # choose seed
+            next_index = index_seed
             seed = training_set[next_index]
 
-            while next_index < ntrain - 1:
+            aux = 0
+            # [fc] hacer tests de este loop
+            while aux < ntrain - 1:
                 if np.allclose(np.abs(seed), 0):
-                    next_index += 1
+                    if next_index < ntrain - 1:
+                        next_index += 1
+                    else:
+                        next_index = 0
+
                     seed = training_set[next_index]
+                    aux += 1
                 else:
                     break
 
@@ -156,7 +197,8 @@ class ReducedBasis:
             errs = sq_errors(np.ones(ntrain), proj_matrix[0])
 
         else:
-            next_index = np.argmax(norms)
+            # choose seed
+            next_index = index_seed  # old version: np.argmax(norms)
             greedy_indices = [next_index]
             basis_data[0] = training_set[next_index] / norms[next_index]
             proj_matrix[0] = integration.dot(basis_data[0], training_set)
@@ -174,26 +216,11 @@ class ReducedBasis:
         nn = 0
         print(nn, sigma, next_index)
         while sigma > self.greedy_tol and self.nmax > nn + 1:
-            nn += 1
-
+ 
             if next_index in greedy_indices:
-                # Prune excess allocated entries
-                greedy_errors, proj_matrix = _prune(greedy_errors,
-                                                    proj_matrix,
-                                                    nn
-                                                    )
-                if self.normalize:
-                    # restore proj matrix
-                    proj_matrix = norms * proj_matrix
+                break
 
-                self.basis = basis_data[:nn]
-                self.indices = greedy_indices
-                self.errors = greedy_errors
-                self.projection_matrix = proj_matrix.T
-                self.integration = integration
-                print(nn, sigma, next_index)
-                return
-
+            nn += 1
             greedy_indices.append(next_index)
             basis_data[nn], _ = _gs_one_element(
                 training_set[greedy_indices[nn]],
@@ -223,11 +250,44 @@ class ReducedBasis:
             # restore proj matrix
             proj_matrix = norms * proj_matrix
 
-        self.basis = basis_data[: nn + 1]
-        self.indices = greedy_indices
-        self.errors = greedy_errors
-        self.projection_matrix = proj_matrix.T
-        self.integration = integration
+        # a esto se lo puede guardar solo cuando el nodo es una hoja del árbol
+        node.basis = basis_data[: nn + 1]
+        node.indices = greedy_indices
+        node.idx_anchor_0 = node.indices[0]
+        node.idx_anchor_1 = node.indices[1]
+        node.errors = greedy_errors
+        node.projection_matrix = proj_matrix.T
+        node.integration = integration
+        
+        if (
+            l < self.lmax
+            and self.greedy_tol < node.errors[-1]
+            and len(node.indices) > 1
+        ):
+
+            idxs_subspace0, idxs_subspace1 = self.partition(
+                parameters, node.idx_anchor_0, node.idx_anchor_1
+            )
+
+            self.fit(
+                training_set[idxs_subspace0],
+                parameters[idxs_subspace0],
+                physical_points,
+                parent=node,
+                node_idx=0,
+                l=l + 1,
+                index_seed=0,
+            )
+
+            self.fit(
+                training_set[idxs_subspace1],
+                parameters[idxs_subspace1],
+                physical_points,
+                parent=node,
+                node_idx=1,
+                l=l + 1,
+                index_seed=0,
+            )
 
     def transform(
         self,
@@ -261,12 +321,87 @@ class ReducedBasis:
                 self.integration.dot(e, test_set), e, axes=0
             )
         return projected_function
+        
+    def partition(self, parameters, idx_anchor0, idx_anchor1):
+        """
+        Parameters
+        ----------
+        parameters: array of parameters from the domain of the problem
+        anchor1: first greedy parameter of the space to divide.
+        anchor2: second greedy parameter of the space to divide.
+
+        Returns
+        -------
+         indices de parametros que corresponden a cada subespacio
+        """
+
+        anchor0 = parameters[idx_anchor0]
+        anchor1 = parameters[idx_anchor1]
+
+        assert not np.array_equal(anchor0, anchor1)
+
+        seed = 12345
+        rng = np.random.default_rng(seed)
+
+        # caso de arby con ts normalizado:
+        # la semilla es el primer elemento,
+        # por lo tanto, si quiero que los anchors vayan primero:
+
+        # #idxs_subspace0 = []
+        # #idxs_subspace1 = []
+        idxs_subspace0 = [idx_anchor0]
+        idxs_subspace1 = [idx_anchor1]
+
+        # y usar a continuación del for --> if idx != idx_anchor0 and idx != idx_anchor1:
+        # sirve para el caso de usar normalize = True en reduced_basis()
+        # da error en splines porque scipy pide los parametros de forma ordenada
+
+        for idx, parameter in enumerate(parameters):
+            if idx != idx_anchor0 and idx != idx_anchor1:
+                dist_anchor0 = np.linalg.norm(anchor0 - parameter)  # 2-norm
+                dist_anchor1 = np.linalg.norm(anchor1 - parameter)
+                if dist_anchor0 < dist_anchor1:
+                    idxs_subspace0.append(idx)
+                elif dist_anchor0 > dist_anchor1:
+                    idxs_subspace1.append(idx)
+                else:
+                    # para distancias iguales se realiza una elección aleatoria.
+                    # tener en cuenta que se puede agregar el parametro a ambos subespacios!
+                    if rng.integers(2):
+                        idxs_subspace0.append(idx)
+                    else:
+                        idxs_subspace1.append(idx)
+
+        return np.array(idxs_subspace0), np.array(idxs_subspace1)
 
 
 def _prune(greedy_errors, proj_matrix, num):
     """Prune arrays to have size num."""
     return greedy_errors[:num], proj_matrix[:num]
 
+
+def _sq_errs_rel(errs, proj_vector):
+    """Square of projection errors from precomputed projection coefficients.
+
+    This function takes advantage of an orthonormalized basis and a normalized
+    training set to compute fewer floating-point operations than in the
+    non-normalized case.
+
+    Parameters
+    ----------
+    errs : numpy.array
+        Projection errors.
+    proj_vector : numpy.ndarray
+        Stores the projection coefficients of the training set onto the actual
+        basis element.
+
+    Returns
+    -------
+    proj_errors : numpy.ndarray
+        Squared projection errors.
+    """
+    return np.subtract(errs, np.abs(proj_vector) ** 2)
+    
 
 def _sq_errs_abs(proj_vector, basis_element, dot_product, diff_training):
     """Square of projection errors from precomputed projection coefficients.
@@ -318,25 +453,3 @@ def _gs_one_element(h, basis, integration, max_iter=3):
 
     return e / new_norm, new_norm
 
-
-def _sq_errs_rel(errs, proj_vector):
-    """Square of projection errors from precomputed projection coefficients.
-
-    This function takes advantage of an orthonormalized basis and a normalized
-    training set to compute fewer floating-point operations than in the
-    non-normalized case.
-
-    Parameters
-    ----------
-    errs : numpy.array
-        Projection errors.
-    proj_vector : numpy.ndarray
-        Stores the projection coefficients of the training set onto the actual
-        basis element.
-
-    Returns
-    -------
-    proj_errors : numpy.ndarray
-        Squared projection errors.
-    """
-    return np.subtract(errs, np.abs(proj_vector) ** 2)
