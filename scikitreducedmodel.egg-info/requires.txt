@@ -1,0 +1,6 @@
+numpy
+pandas
+scipy
+attrs
+matplotlib
+arby
