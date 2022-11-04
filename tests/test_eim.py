@@ -4,14 +4,12 @@ from scipy.integrate import odeint
 
 from skreducedmodel.reducedbasis import ReducedBasis
 
-import numpy as np 
-
-import arby
+import numpy as np
 
 
 def pend(y, t, b, λ):
     θ, ω = y
-    dydt = [ω, -b*ω - λ*np.sin(θ)]
+    dydt = [ω, -b * ω - λ * np.sin(θ)]
 
     return dydt
 
@@ -19,7 +17,7 @@ def pend(y, t, b, λ):
 def test_EIMFit():
 
     b = 0.2
-    y0 = [np.pi/2, 0.]
+    y0 = [np.pi / 2, 0.0]
 
     param = np.linspace(1, 5, 101)
     times = np.linspace(0, 50, 1001)
@@ -35,18 +33,16 @@ def test_EIMFit():
     nmax = 10
 
     model = ReducedBasis(
-                     index_seed_global_rb=0,
-                     greedy_tol=1e-10,
-                     lmax=0,
-                     normalize=False
-                     )
+        index_seed_global_rb=0, greedy_tol=1e-10, lmax=0, normalize=False
+    )
 
     model.fit(
-               training_set=training_set,
-               parameters=parameters,
-               physical_points=physical_points)
+        training_set=training_set,
+        parameters=parameters,
+        physical_points=physical_points,
+    )
 
-    ti = EIM(reduced_base = model)
+    ti = EIM(reduced_base=model)
     ti.fit
 
     print(ti.nodes)

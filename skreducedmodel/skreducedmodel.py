@@ -8,15 +8,16 @@ logger = logging.getLogger("arby.basis")
 class ReducedModel:
     # required performance metrics: prediction time and accuracy of the model.
     def __init__(
-            self,
-            regression_method=None,
-            seed_global_rb=0,
-            greedy_tol=1e-12,
-            lmax=0,
-            nmax=np.inf,
-            normalize=False,
-            all_training_set_for_reg=False,
-            integration_rule="riemann"):
+        self,
+        regression_method=None,
+        seed_global_rb=0,
+        greedy_tol=1e-12,
+        lmax=0,
+        nmax=np.inf,
+        normalize=False,
+        all_training_set_for_reg=False,
+        integration_rule="riemann",
+    ):
 
         # the default one can be Least Squares or Splines (like arby)
         self.regression_method = regression_method
@@ -31,12 +32,12 @@ class ReducedModel:
 
     # fit stage is offline.
     def fit(
-            self,
-            parameters,  # array N x d. N parameters. Each parameter is d dim.
-            # array N x t. N train functions w/ values at t phys_points.
-            training_set,
-            physical_points,  # array 1 x t. physical_points
-            ):
+        self,
+        parameters,  # array N x d. N parameters. Each parameter is d dim.
+        # array N x t. N train functions w/ values at t phys_points.
+        training_set,
+        physical_points,  # array 1 x t. physical_points
+    ):
         # do parameter compression (find reduced basis RB).
         # can be multiple RB's in case of lmax>0.
         # do time compression, finding empirical times T_i.
@@ -53,24 +54,24 @@ class ReducedModel:
         validators.validate_training_set(training_set)
 
         self.reduced_basis = self.create_reduced_basis(
-                #  self,  # [fc] por que funciona comentando el self?
-                training_set,
-                parameters,
-                physical_points,
-                greedy_tol=self.greedy_tol,
-                lmax=self.lmax,
-                nmax=self.nmax,
-                seed_global_rb=self.seed_global_rb,
-                integration_rule=self.integration_rule,
-                normalize=self.normalize
-                )
+            #  self,  # [fc] por que funciona comentando el self?
+            training_set,
+            parameters,
+            physical_points,
+            greedy_tol=self.greedy_tol,
+            lmax=self.lmax,
+            nmax=self.nmax,
+            seed_global_rb=self.seed_global_rb,
+            integration_rule=self.integration_rule,
+            normalize=self.normalize,
+        )
         # return   # [fc] ver la salida que corresponde
 
     # predict stage is online (must be as fast as possible).
     def predict(
-                self,
-                parameters,
-                ):
+        self,
+        parameters,
+    ):
         # search model built on subspace corresponding to parameter
         # compute prediction
         # return prediction

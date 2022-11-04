@@ -1,10 +1,11 @@
 from scipy.integrate import odeint
 import numpy as np
 from skreducedmodel.skreducedmodel import ReducedModel
+
 # from scipy.special import jv as BesselJ
 #
 #
-#def test_dim_rb_with_nmax():
+# def test_dim_rb_with_nmax():
 #    # import data of 1d gravitational waves
 #    q_train = np.load("q_train_1d_seed=1.npy")
 #    ts_train = np.load("ts_train_1d_seed=1.npy")
@@ -124,7 +125,7 @@ def test_rmfit_parameters():
     assert len(rb1.indices) < len(rb2.indices) """
 #
 #
-#def test_rom_rb_interface(rom_parameters):
+# def test_rom_rb_interface(rom_parameters):
 #    """Test API consistency."""
 #    training_set = rom_parameters["training_set"]
 #    physical_points = rom_parameters["physical_points"]

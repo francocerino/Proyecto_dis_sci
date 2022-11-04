@@ -6,7 +6,7 @@ from skreducedmodel.reducedbasis import ReducedBasis
 # from scipy.special import jv as BesselJ
 #
 #
-#def test_dim_rb_with_nmax():
+# def test_dim_rb_with_nmax():
 #    # import data of 1d gravitational waves
 #    q_train = np.load("q_train_1d_seed=1.npy")
 #    ts_train = np.load("ts_train_1d_seed=1.npy")
@@ -32,9 +32,10 @@ from skreducedmodel.reducedbasis import ReducedBasis
 #
 #        assert len(rb.indices) == nmax
 
+
 def pend(y, t, b, λ):
     θ, ω = y
-    dydt = [ω, -b*ω - λ*np.sin(θ)]
+    dydt = [ω, -b * ω - λ * np.sin(θ)]
 
     return dydt
 
@@ -42,7 +43,7 @@ def pend(y, t, b, λ):
 def test_ReducedModelFit():
 
     b = 0.2
-    y0 = [np.pi/2, 0.]
+    y0 = [np.pi / 2, 0.0]
 
     param = np.linspace(1, 5, 101)
     times = np.linspace(0, 50, 1001)
@@ -58,22 +59,19 @@ def test_ReducedModelFit():
     nmax = 10
 
     model = ReducedBasis(
-                     seed_global_rb=0,
-                     greedy_tol=1e-16,
-                     lmax=1,
-                     nmax=nmax,
-                     normalize=True
-                     )
+        seed_global_rb=0, greedy_tol=1e-16, lmax=1, nmax=nmax, normalize=True
+    )
 
     model.fit(
-               training_set=training_set,
-               parameters=parameters,
-               physical_points=physical_points)
+        training_set=training_set,
+        parameters=parameters,
+        physical_points=physical_points,
+    )
 
-    print(model.errors[nmax-1], model.errors[0])
+    print(model.errors[nmax - 1], model.errors[0])
 
-    assert model.errors[0] > model.errors[nmax-1]
-    assert model.errors[5] > model.errors[nmax-1]
+    assert model.errors[0] > model.errors[nmax - 1]
+    assert model.errors[5] > model.errors[nmax - 1]
     assert len(model.indices) == nmax
     assert len(model.indices) == nmax
     # todos los numeros salieron del ejemplo del Pendulo
@@ -83,7 +81,7 @@ def test_ReducedModelFit():
 def test_rmfit_parameters():
 
     b = 0.2
-    y0 = [np.pi/2, 0.]
+    y0 = [np.pi / 2, 0.0]
 
     param = np.linspace(1, 5, 101)
     times = np.linspace(0, 50, 1001)
@@ -99,30 +97,31 @@ def test_rmfit_parameters():
     # nmax = 10
 
     model1 = ReducedBasis(
-                    seed_global_rb=0,
-                    greedy_tol=1e-1,
-                    lmax=1,
-                    )
+        seed_global_rb=0,
+        greedy_tol=1e-1,
+        lmax=1,
+    )
 
     model2 = ReducedBasis(
-                    seed_global_rb=0,
-                    greedy_tol=1e-16,
-                    lmax=1,
-                    )
+        seed_global_rb=0,
+        greedy_tol=1e-16,
+        lmax=1,
+    )
 
     model1.fit(
-            training_set=training_set,
-            parameters=parameters,
-            physical_points=physical_points,
-            )
+        training_set=training_set,
+        parameters=parameters,
+        physical_points=physical_points,
+    )
 
     model2.fit(
-            training_set=training_set,
-            parameters=parameters,
-            physical_points=physical_points,
-            )
+        training_set=training_set,
+        parameters=parameters,
+        physical_points=physical_points,
+    )
 
     assert len(model1.indices) < len(model2.indices)
+
 
 """
 def test_rom_rb_interface(rom_parameters):
@@ -153,4 +152,3 @@ def test_rom_rb_interface(rom_parameters):
     assert len(greedy_indices) == 10
     # assert eim == bessel.basis_.eim
 """
-

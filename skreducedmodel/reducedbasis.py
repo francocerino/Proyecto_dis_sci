@@ -137,8 +137,7 @@ class ReducedBasis:
             self.tree = Node(name=(node_idx,), parameters_ts=parameters)
             node = self.tree
 
-        integration = integrals.Integration(physical_points,
-                                            rule=self.integration_rule)
+        integration = integrals.Integration(physical_points, rule=self.integration_rule)
 
         # useful constants
         ntrain = training_set.shape[0]
@@ -147,9 +146,7 @@ class ReducedBasis:
 
         # validate inputs
         if nsamples != np.size(integration.weights_):
-            raise ValueError(
-                "Number of samples is inconsistent with quadrature rule."
-                            )
+            raise ValueError("Number of samples is inconsistent with quadrature rule.")
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -216,7 +213,7 @@ class ReducedBasis:
         nn = 0
         print(nn, sigma, next_index)
         while sigma > self.greedy_tol and self.nmax > nn + 1:
- 
+
             if next_index in greedy_indices:
                 break
 
@@ -232,11 +229,8 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn],
-                    basis_data[nn],
-                    integration.dot,
-                    diff_training
-                    )
+                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
+                )
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
 
@@ -258,7 +252,7 @@ class ReducedBasis:
         node.errors = greedy_errors
         node.projection_matrix = proj_matrix.T
         node.integration = integration
-        
+
         if (
             l < self.lmax
             and self.greedy_tol < node.errors[-1]
@@ -289,12 +283,7 @@ class ReducedBasis:
                 index_seed=0,
             )
 
-    def transform(
-        self,
-        test_set,
-        parameters,
-        s=(None,)
-    ):
+    def transform(self, test_set, parameters, s=(None,)):
         # def project(self, h, s=(None,)):
         """Project a function h onto the basis.
 
@@ -321,7 +310,7 @@ class ReducedBasis:
                 self.integration.dot(e, test_set), e, axes=0
             )
         return projected_function
-        
+
     def partition(self, parameters, idx_anchor0, idx_anchor1):
         """
         Parameters
@@ -401,7 +390,7 @@ def _sq_errs_rel(errs, proj_vector):
         Squared projection errors.
     """
     return np.subtract(errs, np.abs(proj_vector) ** 2)
-    
+
 
 def _sq_errs_abs(proj_vector, basis_element, dot_product, diff_training):
     """Square of projection errors from precomputed projection coefficients.
@@ -452,4 +441,3 @@ def _gs_one_element(h, basis, integration, max_iter=3):
         raise StopIteration("Max number of iterations reached ({max_iter}).")
 
     return e / new_norm, new_norm
-
