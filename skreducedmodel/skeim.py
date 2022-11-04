@@ -46,30 +46,30 @@ class EIM:
         """
         nodes = []
         v_matrix = None
-        first_node = np.argmax(np.abs(self.base.basis[0]))
+        first_node = np.argmax(np.abs(self.base.tree.basis[0]))
         nodes.append(first_node)
 
-        nbasis = len(self.base.indices)
+        nbasis = len(self.base.tree.indices)
 
         #logger.debug(first_node)
 
         for i in range(1, nbasis):
             #print(i)
-            v_matrix = self._next_vandermonde(self.base.basis, nodes, v_matrix)
-            base_at_nodes = [self.base.basis[i, t] for t in nodes]
+            v_matrix = self._next_vandermonde(self.base.tree.basis, nodes, v_matrix)
+            base_at_nodes = [self.base.tree.basis[i, t] for t in nodes]
             invV_matrix = np.linalg.inv(v_matrix)
-            step_basis = self.base.basis[:i]
+            step_basis = self.base.tree.basis[:i]
             basis_interpolant = base_at_nodes @ invV_matrix @ step_basis
-            residual = self.base.basis[i] - basis_interpolant
+            residual = self.base.tree.basis[i] - basis_interpolant
             new_node = np.argmax(abs(residual))
 
             #logger.debug(new_node)
 
             nodes.append(new_node)
 
-        v_matrix = np.array(self._next_vandermonde(self.base.basis, nodes, v_matrix))
+        v_matrix = np.array(self._next_vandermonde(self.base.tree.basis, nodes, v_matrix))
         invV_matrix = np.linalg.inv(v_matrix.T)
-        interpolant = self.base.basis.T @ invV_matrix
+        interpolant = self.base.tree.basis.T @ invV_matrix
 
         self.interpolant = interpolant
         self.nodes = nodes
