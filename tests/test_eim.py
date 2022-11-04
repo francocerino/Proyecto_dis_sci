@@ -35,9 +35,9 @@ def test_EIMFit():
     nmax = 10
 
     model = ReducedBasis(
-                     seed_global_rb=0,
+                     index_seed_global_rb=0,
                      greedy_tol=1e-10,
-                     lmax=1,
+                     lmax=0,
                      normalize=False
                      )
 
