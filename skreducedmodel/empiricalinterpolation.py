@@ -13,25 +13,20 @@ from . import integrals
 # =================================
 
 
-#logger = logging.getLogger("arby.basis")
+# logger = logging.getLogger("arby.basis")
 
 
-class EIM:
-
+class EmpiricalInterpolation:
     # Se inicializa con la clase base reducida
-    def __init__(self,
-                reduced_base):
-        
+    def __init__(self, reduced_base):
         self.base = reduced_base
 
-
-
-    #def fit(self):
+    # def fit(self):
     #    print(self.base.indices)
 
     @property
     @functools.lru_cache(maxsize=None)
-    def fit(self): 
+    def fit(self):
         """Implement EIM algorithm.
         The Empirical Interpolation Method (EIM) [TiglioAndVillanueva2021]_
         introspects the basis and selects a set of interpolation ``nodes`` from
@@ -51,10 +46,10 @@ class EIM:
 
         nbasis = len(self.base.tree.indices)
 
-        #logger.debug(first_node)
+        # logger.debug(first_node)
 
         for i in range(1, nbasis):
-            #print(i)
+            # print(i)
             v_matrix = self._next_vandermonde(self.base.tree.basis, nodes, v_matrix)
             base_at_nodes = [self.base.tree.basis[i, t] for t in nodes]
             invV_matrix = np.linalg.inv(v_matrix)
@@ -63,18 +58,19 @@ class EIM:
             residual = self.base.tree.basis[i] - basis_interpolant
             new_node = np.argmax(abs(residual))
 
-            #logger.debug(new_node)
+            # logger.debug(new_node)
 
             nodes.append(new_node)
 
-        v_matrix = np.array(self._next_vandermonde(self.base.tree.basis, nodes, v_matrix))
+        v_matrix = np.array(
+            self._next_vandermonde(self.base.tree.basis, nodes, v_matrix)
+        )
         invV_matrix = np.linalg.inv(v_matrix.T)
         interpolant = self.base.tree.basis.T @ invV_matrix
 
         self.interpolant = interpolant
         self.nodes = nodes
-        #return EIM(interpolant=interpolant, nodes=nodes)
-
+        # return EIM(interpolant=interpolant, nodes=nodes)
 
     def _next_vandermonde(self, data, nodes, vandermonde=None):
         """Build the next Vandermonde matrix from the previous one."""

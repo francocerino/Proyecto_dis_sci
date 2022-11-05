@@ -1,4 +1,4 @@
-from skreducedmodel.skeim import EIM
+from skreducedmodel.empiricalinterpolation import EmpiricalInterpolation
 
 from scipy.integrate import odeint
 
@@ -14,7 +14,7 @@ def pend(y, t, b, λ):
     return dydt
 
 
-def test_EIMFit():
+def test_EmpiricalInterpolationit():
 
     b = 0.2
     y0 = [np.pi / 2, 0.0]
@@ -42,7 +42,7 @@ def test_EIMFit():
         physical_points=physical_points,
     )
 
-    ti = EIM(reduced_base=model)
+    ti = EmpiricalInterpolation(reduced_base=model)
     ti.fit
 
     print(ti.nodes)
