@@ -18,11 +18,11 @@ from . import integrals
 
 class EmpiricalInterpolation:
     # Se inicializa con la clase base reducida
-    def __init__(self, reduced_base):
-        self.base = reduced_base
+    def __init__(self, reduced_basis):
+        self.base = reduced_basis
 
     # def fit(self):
-    #    print(self.base.indices)
+    #    print(self.basis.indices)
 
     @property
     @functools.lru_cache(maxsize=None)
