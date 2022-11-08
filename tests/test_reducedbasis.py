@@ -59,7 +59,7 @@ def test_ReducedModelFit():
     nmax = 10
 
     model = ReducedBasis(
-        seed_global_rb=0, greedy_tol=1e-16, lmax=1, nmax=nmax, normalize=True
+        index_seed_global_rb=0, greedy_tol=1e-16, lmax=0, nmax=nmax, normalize=True
     )
 
     model.fit(
@@ -68,14 +68,14 @@ def test_ReducedModelFit():
         physical_points=physical_points,
     )
 
-    print(model.errors[nmax - 1], model.errors[0])
+    print(model.tree.errors[nmax - 1], model.tree.errors[0])
 
-    assert model.errors[0] > model.errors[nmax - 1]
-    assert model.errors[5] > model.errors[nmax - 1]
-    assert len(model.indices) == nmax
-    assert len(model.indices) == nmax
+    assert model.tree.errors[0] > model.tree.errors[nmax - 1]
+    assert model.tree.errors[5] > model.tree.errors[nmax - 1]
+    assert len(model.tree.indices) == nmax
+    assert len(model.tree.indices) == nmax
     # todos los numeros salieron del ejemplo del Pendulo
-    assert model.indices[9] == 92
+    assert model.tree.indices[9] == 92
 
 
 def test_rmfit_parameters():
@@ -97,15 +97,15 @@ def test_rmfit_parameters():
     # nmax = 10
 
     model1 = ReducedBasis(
-        seed_global_rb=0,
+        index_seed_global_rb=0,
         greedy_tol=1e-1,
-        lmax=1,
+        lmax=0,
     )
 
     model2 = ReducedBasis(
-        seed_global_rb=0,
+        index_seed_global_rb=0,
         greedy_tol=1e-16,
-        lmax=1,
+        lmax=0,
     )
 
     model1.fit(
@@ -120,7 +120,7 @@ def test_rmfit_parameters():
         physical_points=physical_points,
     )
 
-    assert len(model1.indices) < len(model2.indices)
+    assert len(model1.tree.indices) < len(model2.tree.indices)
 
 
 """
