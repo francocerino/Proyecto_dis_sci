@@ -42,7 +42,7 @@ def test_EmpiricalInterpolationit():
         physical_points=physical_points,
     )
 
-    ti = EmpiricalInterpolation(reduced_base=model)
+    ti = EmpiricalInterpolation(reduced_basis=model)
     ti.fit
 
     print(ti.nodes)
