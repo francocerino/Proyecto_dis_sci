@@ -1,0 +1,11 @@
+LICENCE
+MANIFEST.in
+README.md
+scikitreducedmodels.egg-info/PKG-INFO
+scikitreducedmodels.egg-info/SOURCES.txt
+scikitreducedmodels.egg-info/dependency_links.txt
+scikitreducedmodels.egg-info/requires.txt
+scikitreducedmodels.egg-info/top_level.txt
+skreducedmodel/integrals.py
+skreducedmodel/skreducedmodel.py
+skreducedmodel/validators.py

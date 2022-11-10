@@ -5,28 +5,10 @@
 
 [tox]
 isolated_build = True
-envlist = py310,coverage,style
+envlist = py10
 
 [testenv]
 deps =
     pytest
 commands =
-    pytest tests/
-
-[testenv:coverage]
-deps = 
-    	coverage
-	pytest-cov
-commands =
-	coverage run -m pytest tests/ 
-	coverage report --fail-under=80 -m
-	
-[testenv:style]
-deps = 
-	flake8
-	flake8
-commands = 
-	flake8 skreducedmodel/ 
-
-
-	
+    pytest tests/test_*

@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: scikitreducedmodels
+Version: 0.0.1
+Summary: Construction of Reduced Models in Python
+Author-email: Franco Cerino <--@gmail.com>
+License: The MIT License
+Project-URL: Homepage, https://github.com/francocerino/scikit-reducedmodel
+Keywords: reduced models,machine learning,gravitational waves
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering
+Description-Content-Type: text/markdown
+License-File: LICENCE
+
+# Scikit-ReducedModel

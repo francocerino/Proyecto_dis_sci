@@ -4,4 +4,3 @@ scipy
 attrs
 matplotlib
 arby
-anytree

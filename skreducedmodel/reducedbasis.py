@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from skreducedmodel import integrals
+from . import integrals
 
 from anytree import Node
 

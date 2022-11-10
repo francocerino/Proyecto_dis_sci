@@ -6,9 +6,9 @@ scikitreducedmodel.egg-info/SOURCES.txt
 scikitreducedmodel.egg-info/dependency_links.txt
 scikitreducedmodel.egg-info/requires.txt
 scikitreducedmodel.egg-info/top_level.txt
+skreducedmodel/empiricalinterpolation.py
 skreducedmodel/integrals.py
 skreducedmodel/reducedbasis.py
-skreducedmodel/skeim.py
 skreducedmodel/skreducedmodel.py
 skreducedmodel/skreducedmoder_edit.py
 skreducedmodel/validators.py

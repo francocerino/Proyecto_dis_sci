@@ -22,7 +22,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 urls = {Homepage = "https://github.com/francocerino/scikit-reducedmodel"}
-dependencies = ["numpy", "pandas", "scipy", "attrs", "matplotlib", "arby", "anytree"]
+dependencies = ["numpy", "pandas", "scipy", "attrs", "matplotlib", "arby"]
 
 [tool.setuptools]
 packages = ["skreducedmodel"]###, "skreducedmodel.*"]
