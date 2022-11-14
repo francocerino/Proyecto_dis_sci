@@ -1,11 +1,9 @@
 import functools
-import logging
-
-import attr
-
 import numpy as np
 
-from . import integrals
+# import logging
+# import attr
+# from . import integrals
 
 
 # =================================
