@@ -10,5 +10,4 @@ skreducedmodel/empiricalinterpolation.py
 skreducedmodel/integrals.py
 skreducedmodel/reducedbasis.py
 skreducedmodel/skreducedmodel.py
-skreducedmodel/skreducedmoder_edit.py
 skreducedmodel/validators.py

@@ -5,7 +5,7 @@
 
 [tox]
 isolated_build = True
-envlist = py33310,coverage,style
+envlist = py310,coverage,style
 
 [testenv]
 deps =
@@ -24,9 +24,11 @@ commands =
 [testenv:style]
 deps = 
 	flake8
-	flake8
+	flake8-black
 commands = 
-	flake8 skreducedmodel/ 
+	flake8 --ignore=E501 skreducedmodel/ 
 
-
+[testenv:docstyle]
+deps = pydocstyle
+commands = pydocstyle skreducedmodels --convention=numpy
 	
