@@ -19,8 +19,7 @@ import numpy as np
 
 
 class EmpiricalInterpolation:
-    
-    """Class with the empirical interpolation functions 
+    """ Class with the empirical interpolation functions 
     and methods
 
     Parameters
