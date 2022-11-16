@@ -276,11 +276,9 @@ class ReducedBasis:
         node.projection_matrix = proj_matrix.T
         node.integration = integration
 
-        if (
-            deep < self.lmax
-            and self.greedy_tol < node.errors[-1]
-            and len(node.indices) > 1
-        ):
+        if deep < self.lmax \
+           and self.greedy_tol < node.errors[-1] \
+           and len(node.indices) > 1:
 
             idxs_subspace0, idxs_subspace1 = self.partition(
                 parameters, node.idx_anchor_0, node.idx_anchor_1
