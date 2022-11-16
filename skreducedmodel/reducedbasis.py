@@ -1,19 +1,18 @@
-
 """Reduced Basis module."""
 
 import logging
+
+from anytree import Node
 
 import numpy as np
 
 from . import integrals
 
-from anytree import Node
-
 logger = logging.getLogger("arby.basis")
 
 
 class ReducedBasis:
-    """ This class contain the methods and function to build 
+    """This class contain the methods and function to build
     the reduced basis.
 
     Parameters
@@ -23,8 +22,8 @@ class ReducedBasis:
     lmax = ...
     nmax = ...
     greedy_tol = ...
-    normalize = 
-    integration_rule = 
+    normalize =
+    integration_rule =
 
     """
 
@@ -55,7 +54,8 @@ class ReducedBasis:
         parameters,
         physical_points,
         # estas quiero que no se puedan modificar por el usuario.
-        # son solo valores para la primera llamada de la funcion fit de la recursion
+        # son solo valores para la primera llamada de la
+        # funcion fit de la recursion
         parent=None,
         node_idx=0,
         l=0,
@@ -138,24 +138,22 @@ class ReducedBasis:
         if self.__first_iteration is True:
             index_seed = self.index_seed_global_rb
             assert (
-                parent is None
-                and node_idx == 0
-                and l == 0
-                # index_seed == self.index_seed_global_rb
-            )
+                parent is None and node_idx == 0 and l == 0)
+        # index_seed == self.index_seed_global_rb
             self.__first_iteration = False
 
         # create a node for the tree
         # if the tree does not exists, create it
         if parent is not None:
             node = Node(
-                name=parent.name + (node_idx,), parent=parent, parameters_ts=parameters
-            )
+                name=parent.name + (node_idx,), parent=parent,
+                parameters_ts=parameters)
         else:
             self.tree = Node(name=(node_idx,), parameters_ts=parameters)
             node = self.tree
 
-        integration = integrals.Integration(physical_points, rule=self.integration_rule)
+        integration = integrals.Integration(physical_points,
+                                            rule=self.integration_rule)
 
         # useful constants
         ntrain = training_set.shape[0]
@@ -164,7 +162,8 @@ class ReducedBasis:
 
         # validate inputs
         if nsamples != np.size(integration.weights_):
-            raise ValueError("Number of samples is inconsistent with quadrature rule.")
+            raise ValueError(
+            "Number of samples is inconsistent with quadrature rule.")
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -247,8 +246,8 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
-                )
+                    proj_matrix[nn], basis_data[nn], integration.dot,
+                    diff_training)
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
 
@@ -272,10 +271,8 @@ class ReducedBasis:
         node.integration = integration
 
         if (
-            l < self.lmax
-            and self.greedy_tol < node.errors[-1]
-            and len(node.indices) > 1
-        ):
+            l < self.lmax and self.greedy_tol < node.errors[-1] and
+            len(node.indices) > 1):
 
             idxs_subspace0, idxs_subspace1 = self.partition(
                 parameters, node.idx_anchor_0, node.idx_anchor_1
