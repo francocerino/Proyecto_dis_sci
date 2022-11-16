@@ -58,7 +58,7 @@ class ReducedBasis:
         # funcion fit de la recursion
         parent=None,
         node_idx=0,
-        l=0,
+        deep=0,
         index_seed=None,  # = self.index_seed_global_rb
     ) -> None:
         """Build a reduced basis from training data.
@@ -137,7 +137,7 @@ class ReducedBasis:
 
         if self.__first_iteration is True:
             index_seed = self.index_seed_global_rb
-            assert parent is None and node_idx == 0 and l == 0
+            assert parent is None and node_idx == 0 and deep == 0
             # index_seed == self.index_seed_global_rb
             self.__first_iteration = False
 
@@ -145,14 +145,17 @@ class ReducedBasis:
         # if the tree does not exists, create it
         if parent is not None:
             node = Node(
-                name=parent.name + (node_idx,), parent=parent,
-                parameters_ts=parameters)
+                name=parent.name + (node_idx,),
+                parent=parent,
+                parameters_ts=parameters,
+            )
         else:
             self.tree = Node(name=(node_idx,), parameters_ts=parameters)
             node = self.tree
 
-        integration = integrals.Integration(physical_points,
-                                            rule=self.integration_rule)
+        integration = integrals.Integration(
+            physical_points, rule=self.integration_rule
+        )
 
         # useful constants
         ntrain = training_set.shape[0]
@@ -161,7 +164,9 @@ class ReducedBasis:
 
         # validate inputs
         if nsamples != np.size(integration.weights_):
-            raise ValueError("Number of samples is inconsistent with quadrature rule.")
+            raise ValueError(
+                "Number of samples is inconsistent with quadrature rule."
+            )
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -244,7 +249,10 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
+                    proj_matrix[nn],
+                    basis_data[nn],
+                    integration.dot,
+                    diff_training,
                 )
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
@@ -269,7 +277,7 @@ class ReducedBasis:
         node.integration = integration
 
         if (
-            l < self.lmax
+            deep < self.lmax
             and self.greedy_tol < node.errors[-1]
             and len(node.indices) > 1
         ):
@@ -284,7 +292,7 @@ class ReducedBasis:
                 physical_points,
                 parent=node,
                 node_idx=0,
-                l=l + 1,
+                deep=deep + 1,
                 index_seed=0,
             )
 
@@ -294,7 +302,7 @@ class ReducedBasis:
                 physical_points,
                 parent=node,
                 node_idx=1,
-                l=l + 1,
+                deep=deep + 1,
                 index_seed=0,
             )
 

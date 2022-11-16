@@ -9,5 +9,4 @@ scikitreducedmodel.egg-info/top_level.txt
 skreducedmodel/empiricalinterpolation.py
 skreducedmodel/integrals.py
 skreducedmodel/reducedbasis.py
-skreducedmodel/skreducedmodel.py
 skreducedmodel/validators.py

@@ -30,7 +30,6 @@ class EmpiricalInterpolation:
 
     """
 
-
     # Se inicializa con la clase base reducida
     def __init__(self, reduced_basis):
         self.base = reduced_basis
@@ -64,12 +63,13 @@ class EmpiricalInterpolation:
 
         for i in range(1, nbasis):
             # print(i)
-            v_matrix = self._next_vandermonde(self.base.tree.basis, nodes,
-                                              v_matrix)
+            v_matrix = self._next_vandermonde(
+                self.base.tree.basis, nodes, v_matrix
+            )
             base_at_nodes = [self.base.tree.basis[i, t] for t in nodes]
-            invV_matrix = np.linalg.inv(v_matrix)
+            invv_matrix = np.linalg.inv(v_matrix)
             step_basis = self.base.tree.basis[:i]
-            basis_interpolant = base_at_nodes @ invV_matrix @ step_basis
+            basis_interpolant = base_at_nodes @ invv_matrix @ step_basis
             residual = self.base.tree.basis[i] - basis_interpolant
             new_node = np.argmax(abs(residual))
 
@@ -80,8 +80,8 @@ class EmpiricalInterpolation:
         v_matrix = np.array(
             self._next_vandermonde(self.base.tree.basis, nodes, v_matrix)
         )
-        invV_matrix = np.linalg.inv(v_matrix.T)
-        interpolant = self.base.tree.basis.T @ invV_matrix
+        invv_matrix = np.linalg.inv(v_matrix.T)
+        interpolant = self.base.tree.basis.T @ invv_matrix
 
         self.interpolant = interpolant
         self.nodes = nodes
