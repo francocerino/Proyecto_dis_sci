@@ -19,15 +19,15 @@ import numpy as np
 
 
 class EmpiricalInterpolation:
-    
-    """Class with the empirical interpolation functions 
+
+    """Class with the empirical interpolation functions
     and methods
 
     Parameters
     ----------
 
     reduced_basis : ...
-    
+
     """
 
 
@@ -64,7 +64,8 @@ class EmpiricalInterpolation:
 
         for i in range(1, nbasis):
             # print(i)
-            v_matrix = self._next_vandermonde(self.base.tree.basis, nodes, v_matrix)
+            v_matrix = self._next_vandermonde(self.base.tree.basis, nodes,
+                                              v_matrix)
             base_at_nodes = [self.base.tree.basis[i, t] for t in nodes]
             invV_matrix = np.linalg.inv(v_matrix)
             step_basis = self.base.tree.basis[:i]

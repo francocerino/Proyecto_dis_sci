@@ -137,9 +137,8 @@ class ReducedBasis:
 
         if self.__first_iteration is True:
             index_seed = self.index_seed_global_rb
-            assert (
-                parent is None and node_idx == 0 and l == 0)
-        # index_seed == self.index_seed_global_rb
+            assert parent is None and node_idx == 0 and l == 0
+            # index_seed == self.index_seed_global_rb
             self.__first_iteration = False
 
         # create a node for the tree
@@ -162,8 +161,7 @@ class ReducedBasis:
 
         # validate inputs
         if nsamples != np.size(integration.weights_):
-            raise ValueError(
-            "Number of samples is inconsistent with quadrature rule.")
+            raise ValueError("Number of samples is inconsistent with quadrature rule.")
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -246,8 +244,8 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn], basis_data[nn], integration.dot,
-                    diff_training)
+                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
+                )
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
 
@@ -271,8 +269,10 @@ class ReducedBasis:
         node.integration = integration
 
         if (
-            l < self.lmax and self.greedy_tol < node.errors[-1] and
-            len(node.indices) > 1):
+            l < self.lmax
+            and self.greedy_tol < node.errors[-1]
+            and len(node.indices) > 1
+        ):
 
             idxs_subspace0, idxs_subspace1 = self.partition(
                 parameters, node.idx_anchor_0, node.idx_anchor_1
@@ -356,9 +356,12 @@ class ReducedBasis:
         idxs_subspace0 = [idx_anchor0]
         idxs_subspace1 = [idx_anchor1]
 
-        # y usar a continuación del for --> if idx != idx_anchor0 and idx != idx_anchor1:
-        # sirve para el caso de usar normalize = True en reduced_basis()
-        # da error en splines porque scipy pide los parametros de forma ordenada
+        # y usar a continuación del for --> if idx != idx_anchor0
+        # and idx != idx_anchor1:
+        # sirve para el caso de usar normalize = True en
+        # reduced_basis()
+        # da error en splines porque scipy
+        # pide los parametros de forma ordenada
 
         for idx, parameter in enumerate(parameters):
             if idx != idx_anchor0 and idx != idx_anchor1:
@@ -369,8 +372,10 @@ class ReducedBasis:
                 elif dist_anchor0 > dist_anchor1:
                     idxs_subspace1.append(idx)
                 else:
-                    # para distancias iguales se realiza una elección aleatoria.
-                    # tener en cuenta que se puede agregar el parametro a ambos subespacios!
+                    # para distancias iguales se realiza
+                    # una elección aleatoria.
+                    # tener en cuenta que se puede agregar el
+                    # parametro a ambos subespacios!
                     if rng.integers(2):
                         idxs_subspace0.append(idx)
                     else:

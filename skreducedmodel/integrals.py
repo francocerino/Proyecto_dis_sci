@@ -120,7 +120,8 @@ class Integration:
     """
 
     interval = attr.ib()
-    rule = attr.ib(validator=attr.validators.in_(QUADRATURES), default="riemann")
+    rule = attr.ib(validator=attr.validators.in_(QUADRATURES),
+                   default="riemann")
 
     nodes_ = attr.ib(init=False, repr=False)
     weights_ = attr.ib(init=False, repr=False)
