@@ -94,13 +94,13 @@ class ReducedBasis:
 
         Parameters
         ----------
+        
         training_set : numpy.ndarray
             The training set of functions.
         physical_points : numpy.ndarray
             Physical points for quadrature rules.
         integration_rule : str, optional
-            The quadrature rule to define an integration scheme.
-            Default = "riemann".
+            The quadrature rule to the integration scheme. Default = "riemann"
         greedy_tol : float, optional
             The greedy tolerance as a stopping condition for the reduced basis
             greedy algorithm. Default = 1e-12.

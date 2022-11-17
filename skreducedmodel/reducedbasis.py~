@@ -1,19 +1,18 @@
-
 """Reduced Basis module."""
 
 import logging
+
+from anytree import Node
 
 import numpy as np
 
 from . import integrals
 
-from anytree import Node
-
 logger = logging.getLogger("arby.basis")
 
 
 class ReducedBasis:
-    """ This class contain the methods and function to build 
+    """This class contain the methods and function to build
     the reduced basis.
 
     Parameters
@@ -23,8 +22,8 @@ class ReducedBasis:
     lmax = ...
     nmax = ...
     greedy_tol = ...
-    normalize = 
-    integration_rule = 
+    normalize =
+    integration_rule =
 
     """
 
@@ -55,10 +54,11 @@ class ReducedBasis:
         parameters,
         physical_points,
         # estas quiero que no se puedan modificar por el usuario.
-        # son solo valores para la primera llamada de la funcion fit de la recursion
+        # son solo valores para la primera llamada de la
+        # funcion fit de la recursion
         parent=None,
         node_idx=0,
-        l=0,
+        deep=0,
         index_seed=None,  # = self.index_seed_global_rb
     ) -> None:
         """Build a reduced basis from training data.
@@ -94,17 +94,17 @@ class ReducedBasis:
 
         Parameters
         ----------
+        
         training_set : numpy.ndarray
             The training set of functions.
         physical_points : numpy.ndarray
             Physical points for quadrature rules.
-        integration_rule : str, optional
-            The quadrature rule to define an integration scheme.
-            Default = "riemann".
-        greedy_tol : float, optional
+        integration_rule : str
+            The quadrature rule to the integration scheme. Default = "riemann"
+        greedy_tol : float
             The greedy tolerance as a stopping condition for the reduced basis
             greedy algorithm. Default = 1e-12.
-        normalize : bool, optional
+        normalize : bool
             True if you want to normalize the training set. Default = False.
 
         Returns
@@ -137,25 +137,25 @@ class ReducedBasis:
 
         if self.__first_iteration is True:
             index_seed = self.index_seed_global_rb
-            assert (
-                parent is None
-                and node_idx == 0
-                and l == 0
-                # index_seed == self.index_seed_global_rb
-            )
+            assert parent is None and node_idx == 0 and deep == 0
+            # index_seed == self.index_seed_global_rb
             self.__first_iteration = False
 
         # create a node for the tree
         # if the tree does not exists, create it
         if parent is not None:
             node = Node(
-                name=parent.name + (node_idx,), parent=parent, parameters_ts=parameters
+                name=parent.name + (node_idx,),
+                parent=parent,
+                parameters_ts=parameters,
             )
         else:
             self.tree = Node(name=(node_idx,), parameters_ts=parameters)
             node = self.tree
 
-        integration = integrals.Integration(physical_points, rule=self.integration_rule)
+        integration = integrals.Integration(
+            physical_points, rule=self.integration_rule
+        )
 
         # useful constants
         ntrain = training_set.shape[0]
@@ -164,7 +164,9 @@ class ReducedBasis:
 
         # validate inputs
         if nsamples != np.size(integration.weights_):
-            raise ValueError("Number of samples is inconsistent with quadrature rule.")
+            raise ValueError(
+                "Number of samples is inconsistent with quadrature rule."
+            )
 
         if np.allclose(np.abs(training_set), 0, atol=1e-30):
             raise ValueError("Null training set!")
@@ -247,7 +249,10 @@ class ReducedBasis:
                 errs = sq_errors(errs, proj_matrix[nn])
             else:
                 errs, diff_training = sq_errors(
-                    proj_matrix[nn], basis_data[nn], integration.dot, diff_training
+                    proj_matrix[nn],
+                    basis_data[nn],
+                    integration.dot,
+                    diff_training,
                 )
             next_index = np.argmax(errs)
             greedy_errors[nn] = errs[next_index]
@@ -271,11 +276,9 @@ class ReducedBasis:
         node.projection_matrix = proj_matrix.T
         node.integration = integration
 
-        if (
-            l < self.lmax
-            and self.greedy_tol < node.errors[-1]
-            and len(node.indices) > 1
-        ):
+        if deep < self.lmax \
+           and self.greedy_tol < node.errors[-1] \
+           and len(node.indices) > 1:
 
             idxs_subspace0, idxs_subspace1 = self.partition(
                 parameters, node.idx_anchor_0, node.idx_anchor_1
@@ -287,7 +290,7 @@ class ReducedBasis:
                 physical_points,
                 parent=node,
                 node_idx=0,
-                l=l + 1,
+                deep=deep + 1,
                 index_seed=0,
             )
 
@@ -297,7 +300,7 @@ class ReducedBasis:
                 physical_points,
                 parent=node,
                 node_idx=1,
-                l=l + 1,
+                deep=deep + 1,
                 index_seed=0,
             )
 
@@ -359,9 +362,12 @@ class ReducedBasis:
         idxs_subspace0 = [idx_anchor0]
         idxs_subspace1 = [idx_anchor1]
 
-        # y usar a continuación del for --> if idx != idx_anchor0 and idx != idx_anchor1:
-        # sirve para el caso de usar normalize = True en reduced_basis()
-        # da error en splines porque scipy pide los parametros de forma ordenada
+        # y usar a continuación del for --> if idx != idx_anchor0
+        # and idx != idx_anchor1:
+        # sirve para el caso de usar normalize = True en
+        # reduced_basis()
+        # da error en splines porque scipy
+        # pide los parametros de forma ordenada
 
         for idx, parameter in enumerate(parameters):
             if idx != idx_anchor0 and idx != idx_anchor1:
@@ -372,8 +378,10 @@ class ReducedBasis:
                 elif dist_anchor0 > dist_anchor1:
                     idxs_subspace1.append(idx)
                 else:
-                    # para distancias iguales se realiza una elección aleatoria.
-                    # tener en cuenta que se puede agregar el parametro a ambos subespacios!
+                    # para distancias iguales se realiza
+                    # una elección aleatoria.
+                    # tener en cuenta que se puede agregar el
+                    # parametro a ambos subespacios!
                     if rng.integers(2):
                         idxs_subspace0.append(idx)
                     else:
