@@ -5,7 +5,7 @@
 
 [tox]
 isolated_build = True
-envlist = py310,coverage,style
+envlist = py310,coverage,style,docstyle,docs
 
 [testenv]
 deps =
@@ -25,10 +25,20 @@ commands =
 deps = 
 	flake8
 	flake8-black
-commands = 
+	flake8-import-order
+commands =
 	flake8 skreducedmodel/ 
+### flake8 --extend-ignore=W503 skreducedmodel/ 
 
 [testenv:docstyle]
 deps = pydocstyle
 commands = pydocstyle skreducedmodels --convention=numpy
-	
+
+[testenv:docs]
+description = "Invoke sphinx-build to build the HTML docs"
+whitelist_externals = make
+usedevelop = True
+skip_install = False
+changedir = docs
+deps = -r {toxinidir}/docs/requirements.txt
+commands = sphinx-build -W -b html -d {envtmpdir}/doctrees source {envtmpdir}/html	

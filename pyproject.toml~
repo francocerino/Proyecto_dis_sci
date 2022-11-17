@@ -1,3 +1,7 @@
+[tool.black]
+line-length = 79
+target-version = ["py310"]
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
@@ -22,7 +26,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 urls = {Homepage = "https://github.com/francocerino/scikit-reducedmodel"}
-dependencies = ["numpy", "pandas", "scipy", "attrs", "matplotlib", "arby"]
+dependencies = ["numpy", "pandas", "scipy", "attrs", "matplotlib", "arby", "anytree", "sphinx-rtd-theme"]
 
 [tool.setuptools]
 packages = ["skreducedmodel"]###, "skreducedmodel.*"]

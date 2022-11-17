@@ -41,15 +41,13 @@ class EmpiricalInterpolation:
     @functools.lru_cache(maxsize=None)
     def fit(self):
         """Implement EIM algorithm.
-        The Empirical Interpolation Method (EIM) [TiglioAndVillanueva2021]_
+        The Empirical Interpolation Method (EIM)
         introspects the basis and selects a set of interpolation ``nodes`` from
         the physical domain for building an ``interpolant`` matrix using the
         basis and the selected nodes. The ``interpolant`` matrix can be used to
         approximate a field of functions for which the span of the basis is a
         good approximant.
-        Returns
-        -------
-        arby.basis.EIM
+        Returns: skreducemodel.eim
         Container for EIM data. Contains (``interpolant``, ``nodes``).
         """
         nodes = []
