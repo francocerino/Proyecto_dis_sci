@@ -2,7 +2,7 @@
 
 import logging
 
-from anytree import Node
+from anytree import Node, RenderTree
 
 import numpy as np
 
@@ -101,10 +101,10 @@ class ReducedBasis:
             node = Node(
                 name=parent.name + (node_idx,),
                 parent=parent,
-                parameters_ts=parameters,
+                train_parameters=parameters,
             )
         else:
-            self.tree = Node(name=(node_idx,), parameters_ts=parameters)
+            self.tree = Node(name=(node_idx,), train_parameters=parameters)
             node = self.tree
 
         integration = integrals.Integration(
@@ -185,7 +185,7 @@ class ReducedBasis:
         # ====== Start greedy loop ======
         logger.debug("\n Step", "\t", "Error")
         nn = 0
-        print(nn, sigma, next_index)
+        # print(nn, sigma, next_index)
         while sigma > self.greedy_tol and self.nmax > nn + 1:
 
             if next_index in greedy_indices:
@@ -212,7 +212,7 @@ class ReducedBasis:
             greedy_errors[nn] = errs[next_index]
 
             sigma = errs[next_index]
-            print(nn, sigma, next_index)
+            # print(nn, sigma, next_index)
             logger.debug(nn, "\t", sigma)
 
         # Prune excess allocated entries
@@ -225,14 +225,17 @@ class ReducedBasis:
         node.basis = basis_data[: nn + 1]
         node.indices = greedy_indices
         node.idx_anchor_0 = node.indices[0]
-        node.idx_anchor_1 = node.indices[1]
+        if len(node.indices) > 1:
+            node.idx_anchor_1 = node.indices[1]
         node.errors = greedy_errors
         node.projection_matrix = proj_matrix.T
         node.integration = integration
 
-        if deep < self.lmax \
-           and self.greedy_tol < node.errors[-1] \
-           and len(node.indices) > 1:
+        if (
+            deep < self.lmax
+            and self.greedy_tol < node.errors[-1]
+            and len(node.indices) > 1
+        ):
 
             idxs_subspace0, idxs_subspace1 = self.partition(
                 parameters, node.idx_anchor_0, node.idx_anchor_1
@@ -258,8 +261,18 @@ class ReducedBasis:
                 index_seed=0,
             )
 
+    def search_leaf(self, parameters, node):
+        # parameters: conjunto de parametros que se quiere buscar sus
+        # respectivas bases reducidas.
+
+        if not node.is_leaf:
+            child = select_child_node(parameters, node)
+            return self.search_leaf(parameters, child)
+        else:
+            return node
+
     def transform(self, test_set, parameters, s=(None,)):
-        # def project(self, h, s=(None,)):
+        # previous version: def project(self, h, s=(None,)):
         """Project a function h onto the basis.
 
         This method represents the action of projecting the function h onto the
@@ -278,15 +291,22 @@ class ReducedBasis:
         projected_function : np.ndarray
             Projection of h onto the basis.
         """
+
+        # search leaf
+        leaf = self.search_leaf(parameters, node=self.tree)
+        # print(f"node name: {leaf.name}. is root: {leaf.is_leaf}")
+        # print(np.sort(leaf.train_parameters[:,0])[0],np.sort(leaf.train_parameters[:,0])[-1])
+
+        # use basis associated to leaf
         s = slice(*s)
         projected_function = 0.0
-        for e in self.basis[s]:
+        for e in leaf.basis[s]:
             projected_function += np.tensordot(
-                self.integration.dot(e, test_set), e, axes=0
+                leaf.integration.dot(e, test_set), e, axes=0
             )
         return projected_function
 
-    def partition(self, parameters, idx_anchor0, idx_anchor1):
+    def partition(self, parameters, idx_anchor_0, idx_anchor_1):
         """
         Parameters
         ----------
@@ -299,10 +319,10 @@ class ReducedBasis:
          indices de parametros que corresponden a cada subespacio
         """
 
-        anchor0 = parameters[idx_anchor0]
-        anchor1 = parameters[idx_anchor1]
+        anchor_0 = parameters[idx_anchor_0]
+        anchor_1 = parameters[idx_anchor_1]
 
-        assert not np.array_equal(anchor0, anchor1)
+        assert not np.array_equal(anchor_0, anchor_1)
 
         seed = 12345
         rng = np.random.default_rng(seed)
@@ -313,8 +333,8 @@ class ReducedBasis:
 
         # #idxs_subspace0 = []
         # #idxs_subspace1 = []
-        idxs_subspace0 = [idx_anchor0]
-        idxs_subspace1 = [idx_anchor1]
+        idxs_subspace_0 = [idx_anchor_0]
+        idxs_subspace_1 = [idx_anchor_1]
 
         # y usar a continuación del for --> if idx != idx_anchor0
         # and idx != idx_anchor1:
@@ -324,24 +344,24 @@ class ReducedBasis:
         # pide los parametros de forma ordenada
 
         for idx, parameter in enumerate(parameters):
-            if idx != idx_anchor0 and idx != idx_anchor1:
-                dist_anchor0 = np.linalg.norm(anchor0 - parameter)  # 2-norm
-                dist_anchor1 = np.linalg.norm(anchor1 - parameter)
-                if dist_anchor0 < dist_anchor1:
-                    idxs_subspace0.append(idx)
-                elif dist_anchor0 > dist_anchor1:
-                    idxs_subspace1.append(idx)
+            if idx != idx_anchor_0 and idx != idx_anchor_1:
+                dist_anchor_0 = np.linalg.norm(anchor_0 - parameter)  # 2-norm
+                dist_anchor_1 = np.linalg.norm(anchor_1 - parameter)
+                if dist_anchor_0 < dist_anchor_1:
+                    idxs_subspace_0.append(idx)
+                elif dist_anchor_0 > dist_anchor_1:
+                    idxs_subspace_1.append(idx)
                 else:
                     # para distancias iguales se realiza
                     # una elección aleatoria.
                     # tener en cuenta que se puede agregar el
                     # parametro a ambos subespacios!
                     if rng.integers(2):
-                        idxs_subspace0.append(idx)
+                        idxs_subspace_0.append(idx)
                     else:
-                        idxs_subspace1.append(idx)
+                        idxs_subspace_1.append(idx)
 
-        return np.array(idxs_subspace0), np.array(idxs_subspace1)
+        return np.array(idxs_subspace_0), np.array(idxs_subspace_1)
 
 
 def _prune(greedy_errors, proj_matrix, num):
@@ -421,3 +441,67 @@ def _gs_one_element(h, basis, integration, max_iter=3):
         raise StopIteration("Max number of iterations reached ({max_iter}).")
 
     return e / new_norm, new_norm
+
+
+def select_child_node(parameter, node):
+    # [fc] refactorizar. que sea más simple
+    # node : se da la raiz del arbol binario para realizar la evaluación.
+    # parameter : parámetro a evaluar por el modelo sustituto de un subespacio.
+
+    seed = 12345
+    rng = np.random.default_rng(seed)
+    anchor_0 = node.train_parameters[node.idx_anchor_0]
+    anchor_1 = node.train_parameters[node.idx_anchor_1]
+
+    dist_anchor_0 = np.linalg.norm(anchor_0 - parameter)  # 2-norm.
+    dist_anchor_1 = np.linalg.norm(anchor_1 - parameter)
+
+    if dist_anchor_0 < dist_anchor_1:
+        if node.children[0].name[-1] == 0:
+            child = node.children[0]
+        else:
+            child = node.children[1]
+    elif dist_anchor_0 > dist_anchor_1:
+        # child = node.children[1]
+        if node.children[0].name[-1] == 1:
+            child = node.children[0]
+        else:
+            child = node.children[1]
+    else:
+        # para distancias iguales se realiza una elección aleatoria.
+        if rng.integers(2):
+            child = node.children[0]
+        else:
+            child = node.children[1]
+    return child
+
+
+def normalize_set(array, domain, rule="riemann"):
+    integration = integrals.Integration(domain, rule)
+    norms = integration.norm(array)
+
+    return np.array(
+        [
+            h if np.allclose(h, 0, atol=1e-15) else h / norms[i]
+            for i, h in enumerate(array)
+        ]
+    )
+
+
+def error(h1, h2, domain, rule="riemann"):
+    """The error is computed in the L2 norm (continuous case) or the 2-norm
+    (discrete case), that is, ||h1 - h2||^2.
+
+    Parameters
+    ----------
+    h1 : np.ndarray
+    h2 : np.ndarray
+    """
+    integration = integrals.Integration(domain, rule)
+    diff = h1 - h2
+    return integration.dot(diff, diff)
+
+
+def visual_tree(tree):
+    for pre, fill, node in RenderTree(tree):
+        print("%s%s" % (pre, node.name))
