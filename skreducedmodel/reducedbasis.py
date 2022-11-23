@@ -12,12 +12,13 @@ logger = logging.getLogger("arby.basis")
 
 
 class ReducedBasis:
-    """This class contain the methods and function to build
+    """Reduced Basis.
+
+    This class contain the methods and function to build
     the reduced basis.
 
     Parameters
     ----------
-
     index_seed_global_rb = ...
     lmax = ...
     nmax = ...
@@ -36,7 +37,11 @@ class ReducedBasis:
         normalize=False,
         integration_rule="riemann",
     ) -> None:
+        """Init Method.
 
+        Initialize the class.
+
+        """
         # the default seed is the first of the array "parameters"
         self.index_seed_global_rb = index_seed_global_rb
         self.lmax = lmax
@@ -74,10 +79,9 @@ class ReducedBasis:
         training_set : numpy.ndarray
            The training set of functions.
         parameters : numpy.ndarray
-           ---
+           aca decir algo...
         physical_points : numpy.ndarray
            Physical points for quadrature rules.
-
 
         References
         ----------
@@ -86,7 +90,6 @@ class ReducedBasis:
            (2021)
 
         """
-
         assert self.nmax > 0 and self.lmax >= 0
 
         if self.__first_iteration is True:
@@ -262,6 +265,18 @@ class ReducedBasis:
             )
 
     def search_leaf(self, parameters, node):
+        """Seach the parameter in the tree.
+
+        Parameters
+        ----------
+        parameters : np.ndarray
+            Set of parameters to search in the tree
+
+        Returns
+        -------
+        node :
+
+        """
         # parameters: conjunto de parametros que se quiere buscar sus
         # respectivas bases reducidas.
 
@@ -291,7 +306,6 @@ class ReducedBasis:
         projected_function : np.ndarray
             Projection of h onto the basis.
         """
-
         # search leaf
         leaf = self.search_leaf(parameters, node=self.tree)
         # print(f"node name: {leaf.name}. is root: {leaf.is_leaf}")
@@ -307,7 +321,8 @@ class ReducedBasis:
         return projected_function
 
     def partition(self, parameters, idx_anchor_0, idx_anchor_1):
-        """
+        """Partition the parameter space.
+
         Parameters
         ----------
         parameters: array of parameters from the domain of the problem
@@ -318,7 +333,6 @@ class ReducedBasis:
         -------
          indices de parametros que corresponden a cada subespacio
         """
-
         anchor_0 = parameters[idx_anchor_0]
         anchor_1 = parameters[idx_anchor_1]
 
@@ -444,6 +458,15 @@ def _gs_one_element(h, basis, integration, max_iter=3):
 
 
 def select_child_node(parameter, node):
+    """Select child node.
+
+    Parameter:
+    ----------
+    parameter : np.ndarray
+        parameter to evaluate by the sustitute model in a subspace
+    node : np.ndarray
+        ..
+    """
     # [fc] refactorizar. que sea más simple
     # node : se da la raiz del arbol binario para realizar la evaluación.
     # parameter : parámetro a evaluar por el modelo sustituto de un subespacio.
@@ -477,6 +500,12 @@ def select_child_node(parameter, node):
 
 
 def normalize_set(array, domain, rule="riemann"):
+    """Normalize set.
+
+    Parameter:
+    ----------
+
+    """
     integration = integrals.Integration(domain, rule)
     norms = integration.norm(array)
 
@@ -489,7 +518,9 @@ def normalize_set(array, domain, rule="riemann"):
 
 
 def error(h1, h2, domain, rule="riemann"):
-    """The error is computed in the L2 norm (continuous case) or the 2-norm
+    """Error function.
+
+    The error is computed in the L2 norm (continuous case) or the 2-norm
     (discrete case), that is, ||h1 - h2||^2.
 
     Parameters
@@ -503,5 +534,10 @@ def error(h1, h2, domain, rule="riemann"):
 
 
 def visual_tree(tree):
+    """Visual Tree.
+
+    Esto no se que hace
+
+    """
     for pre, fill, node in RenderTree(tree):
         print("%s%s" % (pre, node.name))

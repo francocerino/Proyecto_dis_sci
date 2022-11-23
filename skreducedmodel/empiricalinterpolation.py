@@ -19,19 +19,21 @@ import numpy as np
 
 
 class EmpiricalInterpolation:
+    """Empirital interpolation functions and methods.
 
-    """Class with the empirical interpolation functions
-    and methods
+    This class is used to build empirical interpolants.
 
     Parameters
     ----------
-
     reduced_basis : ...
-
     """
 
     # Se inicializa con la clase base reducida
     def __init__(self, reduced_basis):
+        """Initialize the class.
+
+        This methods initialize the EmpiritalInterpolation class.
+        """
         self.base = reduced_basis
 
     # def fit(self):
@@ -41,6 +43,7 @@ class EmpiricalInterpolation:
     @functools.lru_cache(maxsize=None)
     def fit(self):
         """Implement EIM algorithm.
+
         The Empirical Interpolation Method (EIM)
         introspects the basis and selects a set of interpolation ``nodes`` from
         the physical domain for building an ``interpolant`` matrix using the

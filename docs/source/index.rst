@@ -6,7 +6,8 @@
 Welcome to ScikitReduceModel's documentation!
 =============================================
 
-DESCRIPCION 
+Scikit-ReduceModel is a Python package to construct reduced basis, empirical interpolants and
+reduced models from training data set.  
 
 .. toctree::
    :maxdepth: 2
