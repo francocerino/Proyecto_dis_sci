@@ -244,6 +244,10 @@ class ReducedBasis:
                 parameters, node.idx_anchor_0, node.idx_anchor_1
             )
 
+            # agrego estos atributos para usarlos al testear
+            node.idxs_subspace0 = idxs_subspace0
+            node.idxs_subspace1 = idxs_subspace1
+
             self.fit(
                 training_set[idxs_subspace0],
                 parameters[idxs_subspace0],

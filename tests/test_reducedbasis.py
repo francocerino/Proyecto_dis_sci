@@ -1,7 +1,5 @@
-from skreducedmodel import integrals
 from scipy.integrate import odeint
 import numpy as np
-#from skreducedmodel.skreducedmodel import ReducedModel
 from skreducedmodel.reducedbasis import ReducedBasis
 
 # from scipy.special import jv as BesselJ
@@ -46,28 +44,29 @@ def test_ReducedModelFit():
     b = 0.2
     y0 = [np.pi / 2, 0.0]
 
-    param = np.linspace(1, 5, 101)
+    parameters = np.linspace(1, 5, 101)
     times = np.linspace(0, 50, 1001)
 
     training = []
-    for λ in param:
+    for λ in parameters:
         sol = odeint(pend, y0, times, (b, λ))
         training.append(sol[:, 0])
 
     training_set = np.array(training)
-    parameters = param
     physical_points = times
     nmax = 10
 
-    model = ReducedBasis(
-        index_seed_global_rb=0, greedy_tol=1e-16, lmax=0, nmax=nmax, normalize=True
-    )
+    model = ReducedBasis(index_seed_global_rb=0,
+                         greedy_tol=1e-16,
+                         lmax=0,
+                         nmax=nmax,
+                         normalize=True
+                        )
 
-    model.fit(
-        training_set=training_set,
-        parameters=parameters,
-        physical_points=physical_points,
-    )
+    model.fit(training_set=training_set,
+              parameters=parameters,
+              physical_points=physical_points,
+             )
 
     print(model.tree.errors[nmax - 1], model.tree.errors[0])
 
@@ -84,16 +83,15 @@ def test_rmfit_parameters():
     b = 0.2
     y0 = [np.pi / 2, 0.0]
 
-    param = np.linspace(1, 5, 101)
+    parameters = np.linspace(1, 5, 101)
     times = np.linspace(0, 50, 1001)
 
     training = []
-    for λ in param:
+    for λ in parameters:
         sol = odeint(pend, y0, times, (b, λ))
         training.append(sol[:, 0])
 
     training_set = np.array(training)
-    parameters = param
     physical_points = times
     # nmax = 10
 
@@ -153,3 +151,42 @@ def test_rom_rb_interface(rom_parameters):
     assert len(greedy_indices) == 10
     # assert eim == bessel.basis_.eim
 """
+
+def test_partition():
+    # test para para los ts de subespacios resultantes.
+    # interseccion vacia
+    # union da el ts del espacio original.
+    
+    b = 0.2
+    y0 = [np.pi / 2, 0.0]
+
+    parameters = np.linspace(1, 5, 101)
+    times = np.linspace(0, 50, 1001)
+
+    training = []
+    for λ in parameters:
+        sol = odeint(pend, y0, times, (b, λ))
+        training.append(sol[:, 0])
+
+    training_set = np.array(training)
+    physical_points = times
+    nmax = 10
+    lmax = 1
+    
+    model = ReducedBasis(index_seed_global_rb=0,
+                         greedy_tol=1e-16,
+                         lmax=lmax,
+                         nmax=nmax,
+                         normalize=True
+                        )
+
+    model.fit(training_set=training_set,
+              parameters=parameters,
+              physical_points=physical_points,
+             )
+
+    idxs_subspace1 = model.tree.idxs_subspace0
+    idxs_subspace2 = model.tree.idxs_subspace1
+    assert model.tree.height == 1
+    assert set(idxs_subspace2) & set(idxs_subspace1) == set()
+    assert set(idxs_subspace2) | set(idxs_subspace1) == set(range(len(parameters)))
