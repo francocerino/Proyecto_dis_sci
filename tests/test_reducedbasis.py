@@ -153,9 +153,10 @@ def test_rom_rb_interface(rom_parameters):
 """
 
 def test_partition():
-    # test para para los ts de subespacios resultantes.
-    # interseccion vacia
-    # union da el ts del espacio original.
+    # test para para los índices de los parametros de entrenamiento de
+    # los subespacios resultantes.
+    # la interseccion tiene que dar vacia.
+    # la union da los índices parametros de entrenamiento del espacio original
     
     b = 0.2
     y0 = [np.pi / 2, 0.0]
