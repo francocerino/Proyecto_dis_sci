@@ -1,7 +1,8 @@
 from scipy.integrate import odeint
 import numpy as np
 from skreducedmodel.reducedbasis import ReducedBasis
-
+from skreducedmodel.reducedbasis import normalize_set
+from skreducedmodel import integrals
 # from scipy.special import jv as BesselJ
 #
 #
@@ -37,6 +38,17 @@ def pend(y, t, b, λ):
     dydt = [ω, -b * ω - λ * np.sin(θ)]
 
     return dydt
+
+def test_normalize_set(ts_test,times):
+
+    #ts_test = np.load('/data/ts_test_1d_seed_eq_1.npy')
+    #times = np.load('/data/times_1d_seed_eq_1.npy')
+    ts_test_normalized = normalize_set(ts_test,times)
+    integration = integrals.Integration(times, 'riemann')
+    for i in range(10):
+        norms = integration.norm(ts_test_normalized[i,:])
+        assert np.allclose(norms,1,1e-10)
+
 
 
 def test_ReducedModelFit():
@@ -120,6 +132,7 @@ def test_rmfit_parameters():
     )
 
     assert len(model1.tree.indices) < len(model2.tree.indices)
+
 
 
 """
