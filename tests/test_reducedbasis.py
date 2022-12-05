@@ -3,6 +3,7 @@ import numpy as np
 from skreducedmodel.reducedbasis import ReducedBasis
 from skreducedmodel.reducedbasis import normalize_set
 from skreducedmodel import integrals
+from skreducedmodel.reducedbasis import select_child_node
 # from scipy.special import jv as BesselJ
 #
 #
@@ -204,3 +205,40 @@ def test_partition():
     assert model.tree.height == 1
     assert set(idxs_subspace2) & set(idxs_subspace1) == set()
     assert set(idxs_subspace2) | set(idxs_subspace1) == set(range(len(parameters)))
+
+def test_select_child_node():
+
+    b = 0.2
+    y0 = [np.pi / 2, 0.0]
+
+    parameters = np.linspace(1, 5, 101)
+    times = np.linspace(0, 50, 1001)
+
+    training = []
+    for λ in parameters:
+        sol = odeint(pend, y0, times, (b, λ))
+        training.append(sol[:, 0])
+
+    training_set = np.array(training)
+    physical_points = times
+    nmax = 10
+    lmax = 1
+    
+    model = ReducedBasis(index_seed_global_rb=0,
+                         greedy_tol=1e-16,
+                         lmax=lmax,
+                         nmax=nmax,
+                         normalize=True
+                        )
+
+    model.fit(training_set=training_set,
+              parameters=parameters,
+              physical_points=physical_points,
+             )
+    
+    child = select_child_node(1,model.tree)
+    assert np.max(model.tree.children[0].train_parameters) > 1
+    assert np.min(model.tree.children[1].train_parameters) > 1
+    assert (np.max(model.tree.children[0].train_parameters) < 
+           np.min(model.tree.children[1].train_parameters))
+

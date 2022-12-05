@@ -475,8 +475,6 @@ def select_child_node(parameter, node):
     # node : se da la raiz del arbol binario para realizar la evaluación.
     # parameter : parámetro a evaluar por el modelo sustituto de un subespacio.
 
-    seed = 12345
-    rng = np.random.default_rng(seed)
     anchor_0 = node.train_parameters[node.idx_anchor_0]
     anchor_1 = node.train_parameters[node.idx_anchor_1]
 
@@ -496,6 +494,8 @@ def select_child_node(parameter, node):
             child = node.children[1]
     else:
         # para distancias iguales se realiza una elección aleatoria.
+        seed = 12345
+        rng = np.random.default_rng(seed)
         if rng.integers(2):
             child = node.children[0]
         else:
