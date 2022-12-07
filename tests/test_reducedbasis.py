@@ -4,8 +4,28 @@ from skreducedmodel.reducedbasis import ReducedBasis
 from skreducedmodel.reducedbasis import normalize_set
 from skreducedmodel import integrals
 from skreducedmodel.reducedbasis import select_child_node
+
+#######
+
+# section for tests for this dataset:
+path = "tests/data/"
+q_train = np.load(path+"q_train_1d_seed_eq_1.npy")
+q_test = np.load(path+"q_test_1d_seed_eq_1.npy")
+ts_train = np.load(path+"ts_train_1d_seed_eq_1.npy")
+ts_test = np.load(path+"ts_test_1d_seed_eq_1.npy")
+times = np.load(path+"times_1d_seed_eq_1.npy")
+
+def test_normalize_set_wf(ts_test,times):
+    ts_test_normalized = normalize_set(ts_test,times)
+    integration = integrals.Integration(times, 'riemann')
+    for wf in ts_test_normalized:
+        norms = integration.norm(wf)
+        assert np.allclose(norms,1,1e-10)
+
+#######
+
+
 # from scipy.special import jv as BesselJ
-#
 #
 # def test_dim_rb_with_nmax():
 #    # import data of 1d gravitational waves
@@ -40,6 +60,7 @@ def pend(y, t, b, λ):
 
     return dydt
 
+# [fc] que usa como ts_test?
 def test_normalize_set(ts_test,times):
 
     #ts_test = np.load('/data/ts_test_1d_seed_eq_1.npy')
@@ -241,4 +262,3 @@ def test_select_child_node():
     assert np.min(model.tree.children[1].train_parameters) > 1
     assert (np.max(model.tree.children[0].train_parameters) < 
            np.min(model.tree.children[1].train_parameters))
-
